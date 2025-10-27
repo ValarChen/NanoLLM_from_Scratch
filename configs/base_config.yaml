@@ -1,0 +1,34 @@
+# Transformer Model Configuration
+
+# Model parameters
+model:
+  d_model: 512
+  num_layers: 6
+  num_heads: 8
+  d_ff: 2048
+  dropout: 0.1
+  max_len: 5000
+
+# Training parameters
+training:
+  batch_size: 32
+  num_epochs: 10
+  learning_rate: 1e-4
+  optimizer: adam  # or adamw
+  warmup_steps: 1000
+  max_grad_norm: 1.0
+
+# Data parameters
+data:
+  max_len: 128
+  pad_idx: 0
+
+# Experiment parameters
+experiment:
+  seed: 42
+  save_dir: results
+  log_dir: logs
+
+# Device
+device: auto  # auto, cpu, or cuda
+
