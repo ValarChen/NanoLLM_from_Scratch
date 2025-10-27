@@ -34,6 +34,29 @@ NanoLLM_from_Scratch/
 
 ## Installation
 
+### 方式 1: 使用 uv（推荐，更快速）
+
+**在 WSL2 中设置（推荐）：**
+详见 [WSL2_SETUP.md](WSL2_SETUP.md)
+
+**快速开始：**
+```bash
+# 安装 uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 克隆仓库
+git clone https://github.com/ValarChen/NanoLLM_from_Scratch.git
+cd NanoLLM_from_Scratch
+
+# 创建环境并安装依赖
+uv sync
+
+# 运行项目
+uv run python -m src.train
+```
+
+### 方式 2: 使用传统 venv + pip
+
 1. **Clone the repository**
 ```bash
 git clone https://github.com/ValarChen/NanoLLM_from_Scratch.git
@@ -58,13 +81,18 @@ pip install -r requirements.txt
 Run the training script:
 
 ```bash
+# 使用 uv (推荐，自动管理环境)
+uv run python -m src.train
+
+# 或使用脚本
 # On Unix/Linux/Mac
 bash scripts/run.sh
 
 # On Windows
 scripts\run.bat
 
-# Or directly with Python
+# 传统方式（需要先激活环境）
+source .venv/bin/activate  # 或 .venv\Scripts\activate on Windows
 python -m src.train
 ```
 
@@ -214,11 +242,49 @@ Input (batch_size, seq_len)
 
 ## Dependencies
 
+**项目管理：**
+- 使用 `pyproject.toml` 定义项目配置和依赖
+- 支持使用 `uv` 进行快速依赖管理
+- 兼容传统的 `requirements.txt` + `pip`
+
+**主要依赖：**
 - PyTorch >= 2.0.0
 - NumPy >= 1.23.0
 - Matplotlib >= 3.7.0
 - tqdm >= 4.65.0
 - PyYAML >= 6.0
+- TensorBoard >= 2.13.0
+- SentencePiece >= 0.1.99
+
+### 依赖管理命令
+
+**使用 uv (推荐):**
+```bash
+# 安装所有依赖
+uv sync
+
+# 添加新依赖
+uv add package-name
+
+# 移除依赖
+uv remove package-name
+
+# 更新依赖
+uv sync --upgrade
+```
+
+**使用 pip:**
+```bash
+# 安装依赖
+pip install -r requirements.txt
+
+# 生成 requirements.txt
+pip freeze > requirements.txt
+```
+
+## WSL2 设置
+
+项目包含完整的 WSL2 + uv 设置指南，详见 [WSL2_SETUP.md](WSL2_SETUP.md)。
 
 ## License
 
