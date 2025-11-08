@@ -77,3 +77,8 @@ pyproject.toml.uvrc
 # 配置文件
 .uvrc
 pyproject.toml
+
+# 配置文件和文档
+.uvrc
+pyproject.toml
+Windows安装指南.md
