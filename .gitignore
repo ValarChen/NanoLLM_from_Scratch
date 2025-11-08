@@ -54,3 +54,23 @@ checkpoints/
 .DS_Store
 Thumbs.db
 
+# 脚本和自动化文件
+*.bat
+*.ps1
+*.sh
+run_quick_test.py
+download_dataset.py
+generate_report.py
+
+# 文档和说明文件（按需保留）
+安装说明.txt
+推送命令.txt
+完成情况说明.md
+环境检查.md
+运行指南.md
+Windows安装指南.md
+git_sync.md
+GitHub同步说明.md
+QUICKSTART_UV.md
+WSL2_SETUP.md
+pyproject.toml.uvrc
