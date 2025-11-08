@@ -1,17 +1,17 @@
 # NanoLLM from Scratch
 
-A project for BJTU LLM class - Implementation of Transformer from scratch.
+北交大LLM课程项目 - 从零实现Transformer模型。
 
 ## Project Overview
 
-This project implements a complete Transformer model from scratch for sequence-to-sequence tasks (e.g., machine translation). The implementation follows the architecture described in ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762).
+本项目从零开始实现了一个完整的Transformer模型，用于序列到序列任务（如机器翻译）。实现遵循了论文 ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762) 中的架构。
 
 ## Features
 
-- **Complete Transformer Implementation**: Encoder-Decoder architecture with multi-head attention
-- **Modular Design**: Clean separation of components (Attention, FFN, Positional Encoding, etc.)
-- **Training Pipeline**: Full training loop with validation, checkpointing, and learning rate scheduling
-- **Experiments**: Configurable experiments with results visualization
+- **完整的Transformer实现**: 包含Encoder-Decoder架构和Multi-Head Attention
+- **模块化设计**: 组件分离清晰（Attention、FFN、Positional Encoding等）
+- **训练流水线**: 完整的训练循环，包含验证、检查点和学习率调度
+- **实验支持**: 可配置的实验与结果可视化
 
 ## Project Structure
 
@@ -36,10 +36,6 @@ NanoLLM_from_Scratch/
 
 ### 方式 1: 使用 uv（推荐，更快速）
 
-**在 WSL2 中设置（推荐）：**
-详见 [WSL2_SETUP.md](WSL2_SETUP.md)
-
-**快速开始：**
 ```bash
 # 安装 uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -98,7 +94,7 @@ python -m src.train
 
 ### Training Configuration
 
-The default configuration is defined in `src/train.py`. You can modify:
+默认配置定义在 src/train.py 中。可修改以下参数：
 
 - Model parameters: `d_model`, `num_layers`, `num_heads`, `d_ff`
 - Training parameters: `batch_size`, `learning_rate`, `num_epochs`, `optimizer`
@@ -106,32 +102,32 @@ The default configuration is defined in `src/train.py`. You can modify:
 
 ## Model Architecture
 
-### Core Components
+### 核心组件
 
 1. **Scaled Dot-Product Attention**
    - Formula: `Attention(Q,K,V) = softmax(QK^T / √d_k) V`
-   - Includes masking support for padding and causal masks
+   - 支持padding mask和causal mask
 
 2. **Multi-Head Attention**
-   - Splits input into multiple heads for parallel attention computation
-   - Enables model to attend to different representation subspaces
+   - 将输入拆分为多个head并行计算attention
+   - 使模型能够关注不同的表示子空间
 
 3. **Position-wise Feed-Forward Network**
    - Formula: `FFN(x) = max(0, xW_1 + b_1)W_2 + b_2`
-   - Adds non-linearity to the model
+   - 为模型添加非线性
 
 4. **Positional Encoding**
-   - Sinusoidal position encodings to inject position information
+   - 正弦位置编码注入位置信息
    - Formula: `PE(pos, 2i) = sin(pos / 10000^(2i/d_model))`
 
 ### Encoder-Decoder Architecture
 
-- **Encoder**: Stack of N identical layers, each containing:
+- **Encoder**: N个相同层的堆叠，每层包含：
   - Multi-Head Self-Attention
   - Position-wise Feed-Forward Network
   - Residual connections and Layer Normalization
 
-- **Decoder**: Stack of N identical layers, each containing:
+- **Decoder**: N个相同层的堆叠，每层包含：
   - Masked Multi-Head Self-Attention
   - Multi-Head Cross-Attention
   - Position-wise Feed-Forward Network
@@ -143,11 +139,11 @@ The default configuration is defined in `src/train.py`. You can modify:
 
 The training script (`src/train.py`) provides:
 
-- **Trainer class**: Manages the entire training lifecycle
-- **Automatic validation**: Evaluates on validation set each epoch
+- **Trainer class**: 管理整个训练生命周期
+- **Automatic validation**: 每个epoch在验证集上评估
 - **Learning rate scheduling**: Warmup + decay
-- **Checkpointing**: Saves best model and periodic checkpoints
-- **Visualization**: Plots training curves (loss and perplexity)
+- **Checkpointing**: 保存最佳模型和定期checkpoint
+- **Visualization**: 绘制训练曲线（loss和perplexity）
 
 ### Example Training Output
 
@@ -196,11 +192,11 @@ After training, you can view:
 
 ### Ablation Studies
 
-To perform ablation studies:
+可执行以下消融实验：
 
-1. **Remove positional encoding**: Comment out positional encoding in `src/model.py`
-2. **Vary number of heads**: Test with `h=1, 4, 8`
-3. **Adjust model depth**: Try `num_layers=2, 4, 6`
+1. **移除positional encoding**: 注释 `src/model.py` 中的位置编码
+2. **调整head数量**: 测试 `h=1, 4, 8`
+3. **调整模型深度**: 尝试 `num_layers=2, 4, 6`
 
 ## Development
 
@@ -282,18 +278,14 @@ pip install -r requirements.txt
 pip freeze > requirements.txt
 ```
 
-## WSL2 设置
-
-项目包含完整的 WSL2 + uv 设置指南，详见 [WSL2_SETUP.md](WSL2_SETUP.md)。
-
 ## License
 
-This project is for educational purposes as part of the BJTU LLM class.
+本项目仅用于北交大LLM课程教学目的。
 
 ## References
 
-- [Attention Is All You Need](https://arxiv.org/abs/1706.03762) - The Transformer paper
-- [The Illustrated Transformer](http://jalammar.github.io/illustrated-transformer/) - Blog post explaining Transformer architecture
+- [Attention Is All You Need](https://arxiv.org/abs/1706.03762) - Transformer原论文
+- [The Illustrated Transformer](http://jalammar.github.io/illustrated-transformer/) - 图解Transformer架构的博客
 
 ## Author
 
@@ -302,4 +294,4 @@ This project is for educational purposes as part of the BJTU LLM class.
 ## Acknowledgments
 
 - Original Transformer paper by Vaswani et al.
-- BJTU LLM class instructors
+- 北交大LLM课程指导教师
