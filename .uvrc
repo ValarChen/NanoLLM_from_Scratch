@@ -1,9 +1,0 @@
-# uv configuration file
-# See https://docs.astral.sh/uv/
-
-# Python version to use
-python-version = "3.11"
-
-# Auto-install peer dependencies
-# peer-dependencies = "automatic"
-
