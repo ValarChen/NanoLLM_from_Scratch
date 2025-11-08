@@ -38,7 +38,6 @@ ENV/
 
 # Logs and results
 logs/
-results/
 *.log
 
 # Data
@@ -74,11 +73,11 @@ GitHub鍚屾璇存槑.md
 QUICKSTART_UV.md
 WSL2_SETUP.md
 pyproject.toml.uvrc
-# 配置文件
+# 锟斤拷锟斤拷锟侥硷拷
 .uvrc
 pyproject.toml
 
-# 配置文件和文档
+# 锟斤拷锟斤拷锟侥硷拷锟斤拷锟侥碉拷
 .uvrc
 pyproject.toml
-Windows安装指南.md
+Windows锟斤拷装指锟斤拷.md
