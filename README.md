@@ -297,7 +297,7 @@ This project is for educational purposes as part of the BJTU LLM class.
 
 ## Author
 
-- Student at BJTU
+- ValarChen at BJTU
 
 ## Acknowledgments
 

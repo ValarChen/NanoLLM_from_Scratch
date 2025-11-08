@@ -10,12 +10,15 @@ from torch.optim.lr_scheduler import LambdaLR
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'Arial Unicode MS', 'DejaVu Sans']  # 支持中文
+matplotlib.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
 import os
 import json
 from datetime import datetime
 
 from .model import Transformer
-from .dataset import collate_fn, create_vocab, load_sample_data, TranslationDataset
+from .dataset import collate_fn, create_vocab, load_sample_data, load_iwslt2017, TranslationDataset
 
 
 class Trainer:
@@ -198,6 +201,9 @@ class Trainer:
             
             # Plot training curves
             self.plot_training_curves()
+            
+            # Save results table
+            self.save_results_table()
     
     def save_model(self, path):
         """保存模型"""
@@ -230,46 +236,115 @@ class Trainer:
     
     def plot_training_curves(self):
         """绘制训练曲线"""
-        fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+        fig, axes = plt.subplots(1, 2, figsize=(14, 5))
         
         # Loss plot
-        axes[0].plot(self.train_losses, label='Train Loss')
-        axes[0].plot(self.val_losses, label='Val Loss')
-        axes[0].set_xlabel('Epoch')
-        axes[0].set_ylabel('Loss')
-        axes[0].set_title('Training and Validation Loss')
-        axes[0].legend()
-        axes[0].grid(True)
+        axes[0].plot(self.train_losses, label='训练损失', marker='o', linewidth=2)
+        axes[0].plot(self.val_losses, label='验证损失', marker='s', linewidth=2)
+        axes[0].set_xlabel('Epoch', fontsize=12)
+        axes[0].set_ylabel('Loss', fontsize=12)
+        axes[0].set_title('训练和验证损失曲线', fontsize=14, fontweight='bold')
+        axes[0].legend(fontsize=11)
+        axes[0].grid(True, alpha=0.3)
         
         # Perplexity plot
-        axes[1].plot(self.train_perplexities, label='Train PPL')
-        axes[1].plot(self.val_perplexities, label='Val PPL')
-        axes[1].set_xlabel('Epoch')
-        axes[1].set_ylabel('Perplexity')
-        axes[1].set_title('Training and Validation Perplexity')
-        axes[1].legend()
-        axes[1].grid(True)
+        axes[1].plot(self.train_perplexities, label='训练困惑度', marker='o', linewidth=2)
+        axes[1].plot(self.val_perplexities, label='验证困惑度', marker='s', linewidth=2)
+        axes[1].set_xlabel('Epoch', fontsize=12)
+        axes[1].set_ylabel('Perplexity', fontsize=12)
+        axes[1].set_title('训练和验证困惑度曲线', fontsize=14, fontweight='bold')
+        axes[1].legend(fontsize=11)
+        axes[1].grid(True, alpha=0.3)
         
         plt.tight_layout()
-        plt.savefig('results/training_curves.png')
+        plt.savefig('results/training_curves.png', dpi=300, bbox_inches='tight')
         plt.close()
+    
+    def save_results_table(self):
+        """保存结果表格"""
+        import pandas as pd
+        
+        results_data = {
+            'Epoch': list(range(1, len(self.train_losses) + 1)),
+            'Train Loss': [f"{loss:.4f}" for loss in self.train_losses],
+            'Val Loss': [f"{loss:.4f}" for loss in self.val_losses],
+            'Train PPL': [f"{ppl:.2f}" for ppl in self.train_perplexities],
+            'Val PPL': [f"{ppl:.2f}" for ppl in self.val_perplexities]
+        }
+        
+        df = pd.DataFrame(results_data)
+        df.to_csv('results/training_results.csv', index=False, encoding='utf-8-sig')
+        
+        # 也保存为Markdown表格
+        with open('results/training_results.md', 'w', encoding='utf-8') as f:
+            f.write("# 训练结果表格\n\n")
+            f.write(df.to_markdown(index=False))
+        
+        print("结果表格已保存到 results/training_results.csv 和 results/training_results.md")
 
 
 def create_data_loaders(config):
     """创建数据加载器"""
-    # Load sample data (for testing)
-    source_texts, target_texts = load_sample_data()
+    # 尝试加载真实数据集
+    use_real_data = config.get('use_real_data', True)
+    max_samples = config.get('max_samples', None)  # 限制样本数用于快速测试
     
-    # Split into train and val
-    split_idx = int(len(source_texts) * 0.8)
-    train_src = source_texts[:split_idx]
-    train_tgt = target_texts[:split_idx]
-    val_src = source_texts[split_idx:]
-    val_tgt = target_texts[split_idx:]
+    if use_real_data:
+        try:
+            (train_src, train_tgt), (val_src, val_tgt) = load_iwslt2017(
+                data_dir=config.get('data_dir', 'data'),
+                max_samples=max_samples
+            )
+            print(f"使用IWSLT2017数据集: {len(train_src)} 训练样本, {len(val_src)} 验证样本")
+        except Exception as e:
+            print(f"加载真实数据集失败: {e}")
+            print("使用示例数据...")
+            source_texts, target_texts = load_sample_data()
+            split_idx = int(len(source_texts) * 0.8)
+            train_src = source_texts[:split_idx]
+            train_tgt = target_texts[:split_idx]
+            val_src = source_texts[split_idx:]
+            val_tgt = target_texts[split_idx:]
+    else:
+        # Load sample data (for testing)
+        source_texts, target_texts = load_sample_data()
+        split_idx = int(len(source_texts) * 0.8)
+        train_src = source_texts[:split_idx]
+        train_tgt = target_texts[:split_idx]
+        val_src = source_texts[split_idx:]
+        val_tgt = target_texts[split_idx:]
+    
+    # 限制词汇表大小
+    max_vocab_size = config.get('max_vocab_size', 10000)
     
     # Create vocabularies
     src_vocab = create_vocab(train_src)
     tgt_vocab = create_vocab(train_tgt)
+    
+    # 限制词汇表大小（保留最常用的词）
+    if len(src_vocab) > max_vocab_size:
+        # 统计词频
+        word_count = {}
+        for text in train_src:
+            for word in text.split():
+                word_count[word] = word_count.get(word, 0) + 1
+        # 保留最常用的词
+        sorted_words = sorted(word_count.items(), key=lambda x: x[1], reverse=True)
+        src_vocab = {token: idx for idx, token in enumerate(['<PAD>', '<UNK>', '<BOS>', '<EOS>'])}
+        for word, _ in sorted_words[:max_vocab_size - 4]:
+            if word not in src_vocab:
+                src_vocab[word] = len(src_vocab)
+    
+    if len(tgt_vocab) > max_vocab_size:
+        word_count = {}
+        for text in train_tgt:
+            for word in text.split():
+                word_count[word] = word_count.get(word, 0) + 1
+        sorted_words = sorted(word_count.items(), key=lambda x: x[1], reverse=True)
+        tgt_vocab = {token: idx for idx, token in enumerate(['<PAD>', '<UNK>', '<BOS>', '<EOS>'])}
+        for word, _ in sorted_words[:max_vocab_size - 4]:
+            if word not in tgt_vocab:
+                tgt_vocab[word] = len(tgt_vocab)
     
     # Create datasets
     train_dataset = TranslationDataset(train_src, train_tgt, src_vocab, tgt_vocab, config['max_len'])
@@ -312,6 +387,10 @@ def main():
         'warmup_steps': 1000,
         'pad_idx': 0,
         'max_grad_norm': 1.0,
+        'use_real_data': True,
+        'data_dir': 'data',
+        'max_vocab_size': 10000,
+        'max_samples': None,  # 设置为数字可限制样本数用于快速测试
     }
     
     # Create data loaders and get vocab sizes

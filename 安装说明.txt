@@ -1,0 +1,70 @@
+========================================
+Windows 安装说明
+========================================
+
+本项目的安装步骤：
+
+方法1：自动安装（推荐）
+-------------------
+1. 右键点击 "快速安装.bat"，选择"以管理员身份运行"
+2. 按照提示完成安装
+3. 如果 Python 未安装，脚本会提示你手动安装
+
+方法2：手动安装
+-------------------
+1. 安装 Python
+   - 访问: https://www.python.org/downloads/
+   - 下载 Python 3.11 (64-bit)
+   - 安装到 E:\Python311（或 D:\Python311）
+   - 重要：勾选 "Add Python to PATH"
+
+2. 安装 uv
+   打开 PowerShell 或 CMD，运行：
+   pip install uv
+   
+   或使用官方安装脚本：
+   powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+3. 安装项目依赖
+   在项目目录下运行：
+   uv sync
+   
+   或：
+   pip install -r requirements.txt
+
+验证安装
+-------------------
+运行以下命令验证：
+python --version
+pip --version
+uv --version
+
+如果都能显示版本号，说明安装成功！
+
+开始使用
+-------------------
+1. 运行训练：
+   python -m src.train
+
+2. 运行实验：
+   python -m src.experiment
+
+3. 查看结果：
+   结果保存在 results/ 目录
+
+常见问题
+-------------------
+Q: "python 不是内部或外部命令"
+A: Python 未添加到 PATH，需要：
+   1. 重新安装 Python，勾选 "Add Python to PATH"
+   2. 或手动添加到环境变量
+
+Q: "uv 不是内部或外部命令"
+A: uv 安装后需要重启命令行窗口，或手动添加到 PATH：
+   C:\Users\你的用户名\.cargo\bin
+
+Q: 权限错误
+A: 以管理员身份运行 PowerShell 或 CMD
+
+========================================
+

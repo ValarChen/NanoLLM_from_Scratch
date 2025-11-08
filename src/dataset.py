@@ -5,6 +5,11 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
+import os
+from collections import Counter
+import urllib.request
+import tarfile
+import zipfile
 
 
 class TranslationDataset(Dataset):
@@ -121,6 +126,112 @@ def create_vocab(texts, special_tokens=None):
     return vocab
 
 
+def download_iwslt2017(data_dir='data'):
+    """
+    下载IWSLT2017数据集（德语-英语）
+    """
+    os.makedirs(data_dir, exist_ok=True)
+    
+    # IWSLT2017数据集URL
+    base_url = "https://wit3.fbk.eu/archive/2017-01-trnted/texts/de/en/de-en.tgz"
+    tgz_path = os.path.join(data_dir, 'de-en.tgz')
+    extract_path = os.path.join(data_dir, 'iwslt2017')
+    
+    if not os.path.exists(extract_path):
+        print("正在下载IWSLT2017数据集...")
+        try:
+            urllib.request.urlretrieve(base_url, tgz_path)
+            print("下载完成，正在解压...")
+            with tarfile.open(tgz_path, 'r:gz') as tar:
+                tar.extractall(data_dir)
+            os.rename(os.path.join(data_dir, 'de-en'), extract_path)
+            print("数据集准备完成！")
+        except Exception as e:
+            print(f"下载失败: {e}")
+            print("使用备用数据集...")
+            return load_sample_data()
+    
+    return extract_path
+
+
+def load_iwslt2017(data_dir='data', max_samples=None):
+    """
+    加载IWSLT2017数据集
+    
+    Args:
+        data_dir: 数据目录
+        max_samples: 最大样本数（用于快速测试）
+    
+    Returns:
+        source_texts, target_texts: 源语言和目标语言文本列表
+    """
+    extract_path = download_iwslt2017(data_dir)
+    
+    # 查找训练、验证和测试文件
+    train_files = []
+    val_files = []
+    test_files = []
+    
+    for root, dirs, files in os.walk(extract_path):
+        for file in files:
+            if 'train' in file and file.endswith('.de'):
+                train_files.append(os.path.join(root, file))
+            elif 'dev' in file or 'valid' in file:
+                if file.endswith('.de'):
+                    val_files.append(os.path.join(root, file))
+            elif 'test' in file and file.endswith('.de'):
+                test_files.append(os.path.join(root, file))
+    
+    def read_file_pair(de_file, en_file):
+        """读取德语-英语文件对"""
+        source_texts = []
+        target_texts = []
+        
+        try:
+            with open(de_file, 'r', encoding='utf-8') as f_de, \
+                 open(en_file, 'r', encoding='utf-8') as f_en:
+                for de_line, en_line in zip(f_de, f_en):
+                    de_line = de_line.strip()
+                    en_line = en_line.strip()
+                    if de_line and en_line:
+                        source_texts.append(de_line)
+                        target_texts.append(en_line)
+                        if max_samples and len(source_texts) >= max_samples:
+                            break
+        except FileNotFoundError:
+            print(f"文件未找到: {de_file} 或 {en_file}")
+        
+        return source_texts, target_texts
+    
+    # 加载训练数据
+    train_src, train_tgt = [], []
+    for de_file in train_files:
+        en_file = de_file.replace('.de', '.en')
+        if os.path.exists(en_file):
+            src, tgt = read_file_pair(de_file, en_file)
+            train_src.extend(src)
+            train_tgt.extend(tgt)
+    
+    # 加载验证数据
+    val_src, val_tgt = [], []
+    for de_file in val_files:
+        en_file = de_file.replace('.de', '.en')
+        if os.path.exists(en_file):
+            src, tgt = read_file_pair(de_file, en_file)
+            val_src.extend(src)
+            val_tgt.extend(tgt)
+    
+    # 如果没有找到数据，使用示例数据
+    if not train_src:
+        print("未找到IWSLT2017数据，使用示例数据...")
+        return load_sample_data()
+    
+    print(f"加载了 {len(train_src)} 个训练样本")
+    print(f"加载了 {len(val_src)} 个验证样本")
+    
+    return (train_src, train_tgt), (val_src, val_tgt)
+
+
 def load_sample_data():
     """
     加载示例数据用于测试
@@ -131,13 +242,27 @@ def load_sample_data():
     source_texts = [
         "The quick brown fox jumps over the lazy dog .",
         "I love artificial intelligence .",
-        "Transformers are powerful models ."
+        "Transformers are powerful models .",
+        "Machine learning is fascinating .",
+        "Deep neural networks can learn complex patterns .",
+        "Natural language processing enables computers to understand text .",
+        "Attention mechanisms improve model performance .",
+        "The encoder processes input sequences .",
+        "The decoder generates output sequences .",
+        "Positional encoding adds location information ."
     ]
     
     target_texts = [
         "敏捷的棕色狐狸跳过懒狗 。",
         "我喜欢人工智能 。",
-        "Transformer 是强大的模型 。"
+        "Transformer 是强大的模型 。",
+        "机器学习很有趣 。",
+        "深度神经网络可以学习复杂模式 。",
+        "自然语言处理使计算机能够理解文本 。",
+        "注意力机制提高了模型性能 。",
+        "编码器处理输入序列 。",
+        "解码器生成输出序列 。",
+        "位置编码添加位置信息 。"
     ]
     
     return source_texts, target_texts
